@@ -50,7 +50,7 @@ class Customer:
         Returns:
             True if the customer meets real user criteria, False otherwise.
         """
-        raise NotImplementedError
+        return bool(self.name and len(self.name.strip()) > 0)
 
     def add_purchase(self, order: "Order") -> None:
         """Record a purchase (order) in the customer's history.
@@ -58,7 +58,7 @@ class Customer:
         Args:
             order: The Order to add to purchase history.
         """
-        raise NotImplementedError
+        self.purchase_history.append(order)
 
 
 class Item:
@@ -92,7 +92,8 @@ class Menu:
         Args:
             item: The Item to add.
         """
-        raise NotImplementedError
+        if item not in self.items:
+            self.items.append(item)
 
     def remove_item(self, item: Item) -> None:
         """Remove an item from the menu.
@@ -100,7 +101,8 @@ class Menu:
         Args:
             item: The Item to remove.
         """
-        raise NotImplementedError
+        if item in self.items:
+            self.items.remove(item)
 
     def get_items(self) -> List[Item]:
         """Get all items in the menu.
@@ -108,7 +110,7 @@ class Menu:
         Returns:
             A list of all items.
         """
-        raise NotImplementedError
+        return self.items[:]
 
     def filter_by_category(self, category: str) -> List[Item]:
         """Filter items by category.
@@ -119,7 +121,7 @@ class Menu:
         Returns:
             A list of items matching the category.
         """
-        raise NotImplementedError
+        return [item for item in self.items if item.category == category]
 
     def list_categories(self) -> List[str]:
         """List all distinct categories in the menu.
@@ -127,7 +129,7 @@ class Menu:
         Returns:
             A list of unique category names.
         """
-        raise NotImplementedError
+        return list(set(item.category for item in self.items))
 
     def filter_by_price_range(self, min_price: Decimal, max_price: Decimal) -> List[Item]:
         """Filter items by price range (budget filtering).
@@ -142,7 +144,9 @@ class Menu:
         Raises:
             ValueError: If min_price > max_price.
         """
-        raise NotImplementedError
+        if min_price > max_price:
+            raise ValueError("min_price must be <= max_price")
+        return [item for item in self.items if min_price <= item.price <= max_price]
 
     def filter_by_popularity(self, min_rating: int) -> List[Item]:
         """Filter items by minimum popularity rating.
@@ -153,7 +157,7 @@ class Menu:
         Returns:
             A list of items with rating >= min_rating.
         """
-        raise NotImplementedError
+        return [item for item in self.items if item.popularity_rating >= min_rating]
 
     def items_sorted_by_price(self, ascending: bool = True) -> List[Item]:
         """Get all items sorted by price.
@@ -164,7 +168,7 @@ class Menu:
         Returns:
             A sorted list of items.
         """
-        raise NotImplementedError
+        return sorted(self.items, key=lambda item: item.price, reverse=not ascending)
 
     def items_sorted_by_popularity(self, ascending: bool = False) -> List[Item]:
         """Get all items sorted by popularity rating.
@@ -176,7 +180,7 @@ class Menu:
         Returns:
             A sorted list of items.
         """
-        raise NotImplementedError
+        return sorted(self.items, key=lambda item: item.popularity_rating, reverse=not ascending)
 
     def items_sorted_by_name(self) -> List[Item]:
         """Get all items sorted alphabetically by name.
@@ -184,7 +188,7 @@ class Menu:
         Returns:
             A sorted list of items.
         """
-        raise NotImplementedError
+        return sorted(self.items, key=lambda item: item.name)
 
     def average_item_price(self) -> Decimal:
         """Calculate the average price of all items in the menu.
@@ -192,7 +196,11 @@ class Menu:
         Returns:
             The average price (rounded to 2 decimal places), or Decimal(0) if menu is empty.
         """
-        raise NotImplementedError
+        if not self.items:
+            return Decimal("0.00")
+        total = sum(item.price for item in self.items)
+        avg = total / len(self.items)
+        return avg.quantize(Decimal("0.01"))
 
 
 class Order:
@@ -209,7 +217,8 @@ class Order:
             item: The Item to add.
             quantity: The quantity of the item to add.
         """
-        raise NotImplementedError
+        if quantity > 0:
+            self.selected_items[item] = self.selected_items.get(item, 0) + quantity
 
     def remove_item(self, item: Item) -> None:
         """Remove an item from the order.
@@ -217,7 +226,8 @@ class Order:
         Args:
             item: The Item to remove.
         """
-        raise NotImplementedError
+        if item in self.selected_items:
+            del self.selected_items[item]
 
     def get_items(self) -> Dict[Item, int]:
         """Get all items in the order with their quantities.
@@ -225,7 +235,7 @@ class Order:
         Returns:
             A dictionary mapping items to their quantities.
         """
-        raise NotImplementedError
+        return self.selected_items.copy()
 
     def total_cost(self) -> Decimal:
         """Calculate the total cost of the order.
@@ -233,7 +243,10 @@ class Order:
         Returns:
             The total cost as a Decimal.
         """
-        raise NotImplementedError
+        total = Decimal("0.00")
+        for item, quantity in self.selected_items.items():
+            total += item.price * quantity
+        return total
 
     def item_subtotal(self, item: Item) -> Decimal:
         """Calculate the subtotal for a single item in the order.
@@ -245,7 +258,9 @@ class Order:
             The subtotal (price × quantity) as a Decimal. Returns Decimal(0) if item
             is not in the order (does not raise an error).
         """
-        raise NotImplementedError
+        if item in self.selected_items:
+            return item.price * self.selected_items[item]
+        return Decimal("0.00")
 
     def item_count(self) -> int:
         """Get the total number of items in the order (sum of all quantities).
@@ -253,7 +268,7 @@ class Order:
         Returns:
             The total item count.
         """
-        raise NotImplementedError
+        return sum(self.selected_items.values())
 
     def get_items_sorted_by_price(self, ascending: bool = True) -> List[Tuple[Item, int]]:
         """Get order items sorted by price (useful for receipt formatting).
@@ -264,4 +279,7 @@ class Order:
         Returns:
             A list of (Item, quantity) tuples sorted by item price.
         """
-        raise NotImplementedError
+        sorted_items = sorted(self.selected_items.items(), 
+                             key=lambda x: x[0].price, 
+                             reverse=not ascending)
+        return sorted_items

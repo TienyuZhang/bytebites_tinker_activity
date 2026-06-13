@@ -135,7 +135,43 @@ class TestOrder(unittest.TestCase):
 
     def test_item_count(self):
         """Test counting total items in order."""
-        pass
+        # Add items to order
+        self.order.selected_items = {self.item1: 3, self.item2: 2}
+        
+        # Total items: 3 + 2 = 5
+        self.assertEqual(self.order.item_count(), 5)
+        
+        # Empty order should have 0 items
+        empty_order = Order()
+        self.assertEqual(empty_order.item_count(), 0)
+
+    def test_calculate_total_with_multiple_items(self):
+        """Logic Test (Happy Path): Calculate total with multiple distinct items.
+        
+        Scenario: User adds a $10 burger and a $5 soda. Total should be $15.
+        """
+        # Set up items with simple prices for clarity
+        burger = Item("Simple Burger", Decimal("10.00"), "Burgers", 7)
+        soda = Item("Simple Soda", Decimal("5.00"), "Drinks", 6)
+        
+        # Add items to order: 1 burger + 1 soda
+        self.order.selected_items = {burger: 1, soda: 1}
+        
+        # Expected: 10.00 + 5.00 = 15.00
+        self.assertEqual(self.order.total_cost(), Decimal("15.00"))
+
+    def test_order_total_is_zero_when_empty(self):
+        """Edge Case Test: Verify empty order returns $0, not an error.
+        
+        Scenario: User opens a transaction but adds nothing. System should
+        return $0.00, not crash or raise an exception.
+        """
+        # Create new empty order
+        new_order = Order()
+        self.assertEqual(len(new_order.selected_items), 0)
+        
+        # Calling total_cost on empty order should return 0, not raise exception
+        self.assertEqual(new_order.total_cost(), Decimal("0.00"))
 
 
 class TestCustomer(unittest.TestCase):
