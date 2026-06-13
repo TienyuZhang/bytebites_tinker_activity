@@ -29,7 +29,7 @@ See bytebites_design.md for the full UML class diagram and design notes.
 """
 
 from decimal import Decimal
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 class Customer:
@@ -129,6 +129,71 @@ class Menu:
         """
         raise NotImplementedError
 
+    def filter_by_price_range(self, min_price: Decimal, max_price: Decimal) -> List[Item]:
+        """Filter items by price range (budget filtering).
+        
+        Args:
+            min_price: The minimum price (inclusive).
+            max_price: The maximum price (inclusive).
+            
+        Returns:
+            A list of items where min_price <= item.price <= max_price.
+            
+        Raises:
+            ValueError: If min_price > max_price.
+        """
+        raise NotImplementedError
+
+    def filter_by_popularity(self, min_rating: int) -> List[Item]:
+        """Filter items by minimum popularity rating.
+        
+        Args:
+            min_rating: The minimum popularity rating (inclusive).
+            
+        Returns:
+            A list of items with rating >= min_rating.
+        """
+        raise NotImplementedError
+
+    def items_sorted_by_price(self, ascending: bool = True) -> List[Item]:
+        """Get all items sorted by price.
+        
+        Args:
+            ascending: If True, sort low-to-high; if False, high-to-low.
+            
+        Returns:
+            A sorted list of items.
+        """
+        raise NotImplementedError
+
+    def items_sorted_by_popularity(self, ascending: bool = False) -> List[Item]:
+        """Get all items sorted by popularity rating.
+        
+        Args:
+            ascending: If False (default), sort high-to-low (most popular first).
+                      If True, sort low-to-high.
+            
+        Returns:
+            A sorted list of items.
+        """
+        raise NotImplementedError
+
+    def items_sorted_by_name(self) -> List[Item]:
+        """Get all items sorted alphabetically by name.
+        
+        Returns:
+            A sorted list of items.
+        """
+        raise NotImplementedError
+
+    def average_item_price(self) -> Decimal:
+        """Calculate the average price of all items in the menu.
+        
+        Returns:
+            The average price (rounded to 2 decimal places), or Decimal(0) if menu is empty.
+        """
+        raise NotImplementedError
+
 
 class Order:
     """A single transaction containing selected items with quantities."""
@@ -167,5 +232,36 @@ class Order:
         
         Returns:
             The total cost as a Decimal.
+        """
+        raise NotImplementedError
+
+    def item_subtotal(self, item: Item) -> Decimal:
+        """Calculate the subtotal for a single item in the order.
+        
+        Args:
+            item: The Item to compute subtotal for.
+            
+        Returns:
+            The subtotal (price × quantity) as a Decimal. Returns Decimal(0) if item
+            is not in the order (does not raise an error).
+        """
+        raise NotImplementedError
+
+    def item_count(self) -> int:
+        """Get the total number of items in the order (sum of all quantities).
+        
+        Returns:
+            The total item count.
+        """
+        raise NotImplementedError
+
+    def get_items_sorted_by_price(self, ascending: bool = True) -> List[Tuple[Item, int]]:
+        """Get order items sorted by price (useful for receipt formatting).
+        
+        Args:
+            ascending: If True (default), sort low-to-high; if False, high-to-low.
+            
+        Returns:
+            A list of (Item, quantity) tuples sorted by item price.
         """
         raise NotImplementedError
