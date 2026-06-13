@@ -49,7 +49,22 @@ class TestMenu(unittest.TestCase):
 
     def test_filter_by_category(self):
         """Test filtering items by category."""
-        pass
+        # Add items to menu (assuming add_item is implemented)
+        self.menu.items = [self.item1, self.item2, self.item3]
+        
+        # Filter for Drinks category
+        drinks = self.menu.filter_by_category("Drinks")
+        self.assertEqual(len(drinks), 1)
+        self.assertEqual(drinks[0].name, "Large Soda")
+        
+        # Filter for Desserts category
+        desserts = self.menu.filter_by_category("Desserts")
+        self.assertEqual(len(desserts), 1)
+        self.assertEqual(desserts[0].category, "Desserts")
+        
+        # Filter for category with no items
+        empty_result = self.menu.filter_by_category("Pizza")
+        self.assertEqual(len(empty_result), 0)
 
     def test_filter_by_price_range(self):
         """Test filtering items by price range."""
@@ -83,15 +98,40 @@ class TestOrder(unittest.TestCase):
 
     def test_add_item_to_order(self):
         """Test adding items to an order."""
-        pass
+        # Add single item
+        self.order.add_item(self.item1, 2)
+        self.assertEqual(len(self.order.selected_items), 1)
+        self.assertEqual(self.order.selected_items[self.item1], 2)
+        
+        # Add another item
+        self.order.add_item(self.item2, 1)
+        self.assertEqual(len(self.order.selected_items), 2)
 
     def test_total_cost(self):
-        """Test calculating total order cost."""
-        pass
+        """Test calculating total order cost with items."""
+        # Add items to order (assuming add_item is implemented)
+        self.order.selected_items = {self.item1: 2, self.item2: 1}
+        
+        # Expected total: (12.99 * 2) + (3.50 * 1) = 25.98 + 3.50 = 29.48
+        expected_total = Decimal("29.48")
+        actual_total = self.order.total_cost()
+        self.assertEqual(actual_total, expected_total)
+    
+    def test_total_cost_empty(self):
+        """Test calculating total cost of an empty order."""
+        # Empty order should have zero cost
+        self.assertEqual(self.order.total_cost(), Decimal("0.00"))
 
     def test_item_subtotal(self):
         """Test calculating subtotal for a single item."""
-        pass
+        # Add items to order
+        self.order.selected_items = {self.item1: 3}
+        
+        # Subtotal for item1: 12.99 * 3 = 38.97
+        self.assertEqual(self.order.item_subtotal(self.item1), Decimal("38.97"))
+        
+        # Subtotal for item not in order should be 0
+        self.assertEqual(self.order.item_subtotal(self.item2), Decimal("0.00"))
 
     def test_item_count(self):
         """Test counting total items in order."""
